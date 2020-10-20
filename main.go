@@ -60,8 +60,10 @@ func init() {
 func main() {
 	defer logFile.Close()
 
-	WorkingDir = *flag.String("wd", WorkingDir, "working directory")
+	wd := flag.String("wd", WorkingDir, "working directory")
 	flag.Parse()
+
+	WorkingDir = *wd
 
 	syTempFolder := filepath.Join(os.TempDir(), "siyuan")
 	p := filepath.Join(syTempFolder, "update.zip")
