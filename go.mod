@@ -1,4 +1,4 @@
-module github.com/siyuan-note/kernel-updater
+module github.com/siyuan-note/siyuan-updater
 
 go 1.15
 
