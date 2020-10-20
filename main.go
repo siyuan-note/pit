@@ -67,8 +67,8 @@ func main() {
 	WorkingDir = *wd
 
 	syTempFolder := filepath.Join(os.TempDir(), "siyuan")
-	p := filepath.Join(syTempFolder, "update.zip")
-	if !gulu.File.IsExist(p) {
+	updateZipPath := filepath.Join(syTempFolder, "update.zip")
+	if !gulu.File.IsExist(updateZipPath) {
 		return
 	}
 
@@ -88,14 +88,29 @@ func main() {
 	guide := filepath.Join(WorkingDir, "guide")
 	asar := filepath.Join(WorkingDir, "app.asar")
 
-	os.RemoveAll(appearance)
-	os.RemoveAll(assets)
-	os.RemoveAll(guide)
-	os.RemoveAll(kernel)
-	os.RemoveAll(asar)
+	if err := os.RemoveAll(appearance); nil != err {
+		Logger.Errorf("remove [appearance] failed: %s", err)
+		return
+	}
+	if err := os.RemoveAll(assets); nil != err {
+		Logger.Errorf("remove [assets] failed: %s", err)
+		return
+	}
+	if err := os.RemoveAll(guide); nil != err {
+		Logger.Errorf("remove [guide] failed: %s", err)
+		return
+	}
+	if err := os.RemoveAll(kernel); nil != err {
+		Logger.Errorf("remove [kernel] failed: %s", err)
+		return
+	}
+	if err := os.RemoveAll(asar); nil != err {
+		Logger.Errorf("remove [app.asar] failed: %s", err)
+		return
+	}
 
-	Logger.Infof("unzipping update pack [from=%s, to=%s]", p, WorkingDir)
-	if err := gulu.Zip.Unzip(p, WorkingDir); nil != err {
+	Logger.Infof("unzipping update pack [from=%s, to=%s]", updateZipPath, WorkingDir)
+	if err := gulu.Zip.Unzip(updateZipPath, WorkingDir); nil != err {
 		Logger.Errorf("unzip update pack failed: %s", err)
 		return
 	}
@@ -110,8 +125,8 @@ func main() {
 			return
 		}
 	}
-	if err := os.RemoveAll(p); nil != err {
-		Logger.Errorf("remove update pack [%s] failed: %s", p, err)
+	if err := os.RemoveAll(updateZipPath); nil != err {
+		Logger.Errorf("remove update pack [%s] failed: %s", updateZipPath, err)
 		return
 	}
 }
