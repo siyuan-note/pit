@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/88250/gulu"
 )
@@ -71,6 +72,7 @@ func main() {
 		return
 	}
 
+	time.Sleep(500 * time.Millisecond)
 	kernel := filepath.Join(WorkingDir, "kernel")
 	if gulu.OS.IsWindows() {
 		kernel += ".exe"
@@ -100,6 +102,13 @@ func main() {
 	Logger.Infof("unzipped update pack")
 	if gulu.OS.IsLinux() || gulu.OS.IsDarwin() {
 		exec.Command("chmod", "+x", kernel)
+	}
+	if gulu.OS.IsWindows() {
+		unzipKernel := filepath.Join(WorkingDir, "kernel-win.exe")
+		if err := os.Rename(unzipKernel, kernel); nil != err {
+			Logger.Errorf("rename kernel [from=%s, to=%s] failed: %s", unzipKernel, kernel, err)
+			return
+		}
 	}
 	if err := os.RemoveAll(p); nil != err {
 		Logger.Errorf("remove update pack [%s] failed: %s", p, err)
