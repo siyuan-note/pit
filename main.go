@@ -71,13 +71,6 @@ func main() {
 		return
 	}
 
-	Logger.Infof("unzipping update pack [from=%s, to=%s]", p, WorkingDir)
-	if err := gulu.Zip.Unzip(p, WorkingDir); nil != err {
-		Logger.Errorf("unzip update pack failed: %s", err)
-		return
-	}
-	Logger.Infof("unzipped update pack")
-
 	kernel := filepath.Join(WorkingDir, "kernel")
 	if gulu.OS.IsWindows() {
 		kernel += ".exe"
@@ -87,9 +80,27 @@ func main() {
 		} else if gulu.OS.IsDarwin() {
 			kernel += "-darwin"
 		}
+	}
+	appearance := filepath.Join(WorkingDir, "appearance")
+	assets := filepath.Join(WorkingDir, "assets")
+	guide := filepath.Join(WorkingDir, "guide")
+	asar := filepath.Join(WorkingDir, "app.asar")
+
+	os.RemoveAll(appearance)
+	os.RemoveAll(assets)
+	os.RemoveAll(guide)
+	os.RemoveAll(kernel)
+	os.RemoveAll(asar)
+
+	Logger.Infof("unzipping update pack [from=%s, to=%s]", p, WorkingDir)
+	if err := gulu.Zip.Unzip(p, WorkingDir); nil != err {
+		Logger.Errorf("unzip update pack failed: %s", err)
+		return
+	}
+	Logger.Infof("unzipped update pack")
+	if gulu.OS.IsLinux() || gulu.OS.IsDarwin() {
 		exec.Command("chmod", "+x", kernel)
 	}
-
 	if err := os.RemoveAll(p); nil != err {
 		Logger.Errorf("remove update pack [%s] failed: %s", p, err)
 		return
