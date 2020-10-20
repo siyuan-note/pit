@@ -1,2 +1,3 @@
-# kernel-updater
-思源内核更新器。
+# siyuan-updater
+
+思源笔记更新器。
