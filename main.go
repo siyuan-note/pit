@@ -7,9 +7,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/88250/gulu"
@@ -58,6 +60,9 @@ func init() {
 func main() {
 	defer logFile.Close()
 
+	WorkingDir = *flag.String("wd", WorkingDir, "working directory")
+	flag.Parse()
+
 	syTempFolder := filepath.Join(os.TempDir(), "siyuan")
 	p := filepath.Join(syTempFolder, "update.zip")
 	if !gulu.File.IsExist(p) {
@@ -70,6 +75,19 @@ func main() {
 		return
 	}
 	Logger.Infof("unzipped update pack")
+
+	kernel := filepath.Join(WorkingDir, "kernel")
+	if gulu.OS.IsWindows() {
+		kernel += ".exe"
+	} else {
+		if gulu.OS.IsLinux() {
+			kernel += "-linux"
+		} else if gulu.OS.IsDarwin() {
+			kernel += "-darwin"
+		}
+		exec.Command("chmod", "+x", kernel)
+	}
+
 	if err := os.RemoveAll(p); nil != err {
 		Logger.Errorf("remove update pack [%s] failed: %s", p, err)
 		return
