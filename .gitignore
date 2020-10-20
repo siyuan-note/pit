@@ -4,6 +4,9 @@
 *.dll
 *.so
 *.dylib
+updater-win.exe
+updater-linux
+updater-darwin
 
 # Test binary, built with `go test -c`
 *.test
