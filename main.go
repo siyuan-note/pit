@@ -88,25 +88,35 @@ func main() {
 	guide := filepath.Join(WorkingDir, "guide")
 	asar := filepath.Join(WorkingDir, "app.asar")
 
-	if err := os.RemoveAll(appearance); nil != err {
-		Logger.Errorf("remove [appearance] failed: %s", err)
-		return
-	}
-	if err := os.RemoveAll(assets); nil != err {
-		Logger.Errorf("remove [assets] failed: %s", err)
-		return
-	}
-	if err := os.RemoveAll(guide); nil != err {
-		Logger.Errorf("remove [guide] failed: %s", err)
-		return
-	}
-	if err := os.RemoveAll(kernel); nil != err {
-		Logger.Errorf("remove [kernel] failed: %s", err)
-		return
-	}
-	if err := os.RemoveAll(asar); nil != err {
-		Logger.Errorf("remove [app.asar] failed: %s", err)
-		return
+	for cnt := 0; cnt < 7; cnt++ {
+		if err := os.RemoveAll(kernel); nil != err {
+			Logger.Errorf("remove [kernel] failed: %s", err)
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		if err := os.RemoveAll(asar); nil != err {
+			Logger.Errorf("remove [app.asar] failed: %s", err)
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+
+		if err := os.RemoveAll(appearance); nil != err {
+			Logger.Errorf("remove [appearance] failed: %s", err)
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		if err := os.RemoveAll(assets); nil != err {
+			Logger.Errorf("remove [assets] failed: %s", err)
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		if err := os.RemoveAll(guide); nil != err {
+			Logger.Errorf("remove [guide] failed: %s", err)
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+
+		break
 	}
 
 	Logger.Infof("unzipping update pack [from=%s, to=%s]", updateZipPath, WorkingDir)
