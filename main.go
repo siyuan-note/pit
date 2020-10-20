@@ -119,9 +119,9 @@ func main() {
 		exec.Command("chmod", "+x", kernel)
 	}
 	if gulu.OS.IsWindows() {
-		unzipKernel := filepath.Join(WorkingDir, "kernel-win.exe")
-		if err := os.Rename(unzipKernel, kernel); nil != err {
-			Logger.Errorf("rename kernel [from=%s, to=%s] failed: %s", unzipKernel, kernel, err)
+		unzippedKernel := filepath.Join(WorkingDir, "kernel-win.exe")
+		if err := os.Rename(unzippedKernel, kernel); nil != err {
+			Logger.Errorf("rename kernel [from=%s, to=%s] failed: %s", unzippedKernel, kernel, err)
 			return
 		}
 	}
