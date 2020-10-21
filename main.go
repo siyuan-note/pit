@@ -125,15 +125,14 @@ func main() {
 		return
 	}
 	Logger.Infof("unzipped update pack")
-	if gulu.OS.IsLinux() || gulu.OS.IsDarwin() {
-		exec.Command("chmod", "+x", kernel)
-	}
 	if gulu.OS.IsWindows() {
 		unzippedKernel := filepath.Join(WorkingDir, "kernel-win.exe")
 		if err := os.Rename(unzippedKernel, kernel); nil != err {
 			Logger.Errorf("rename kernel [from=%s, to=%s] failed: %s", unzippedKernel, kernel, err)
 			return
 		}
+	} else {
+		exec.Command("chmod", "+x", kernel).CombinedOutput()
 	}
 	if err := os.RemoveAll(updateZipPath); nil != err {
 		Logger.Errorf("remove update pack [%s] failed: %s", updateZipPath, err)
