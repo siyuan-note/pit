@@ -84,7 +84,7 @@ func main() {
 		}
 	}
 	appearance := filepath.Join(WorkingDir, "appearance")
-	assets := filepath.Join(WorkingDir, "assets")
+	stage := filepath.Join(WorkingDir, "stage")
 	guide := filepath.Join(WorkingDir, "guide")
 	asar := filepath.Join(WorkingDir, "app.asar")
 
@@ -105,8 +105,8 @@ func main() {
 			time.Sleep(50 * time.Millisecond)
 			continue
 		}
-		if err := os.RemoveAll(assets); nil != err {
-			Logger.Errorf("remove [assets] failed: %s", err)
+		if err := os.RemoveAll(stage); nil != err {
+			Logger.Errorf("remove [stage] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
 		}
