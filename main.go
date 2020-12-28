@@ -19,10 +19,12 @@ import (
 )
 
 var (
-	HomeDir, _    = gulu.OS.Home()
-	WorkingDir, _ = os.Getwd()
-	ConfDir       = filepath.Join(HomeDir, ".siyuan")
-	LogPath       = filepath.Join(ConfDir, "siyuan-update.log")
+	HomeDir, _       = gulu.OS.Home()
+	WorkingDir, _    = os.Getwd()
+	ConfDir          = filepath.Join(HomeDir, ".siyuan")
+	LogPath          = filepath.Join(ConfDir, "siyuan-update.log")
+	SiYuanTempFolder = filepath.Join(os.TempDir(), "siyuan")
+	UpdateZipPath    = filepath.Join(SiYuanTempFolder, "update.zip")
 )
 
 var (
@@ -30,45 +32,27 @@ var (
 	logFile *os.File
 )
 
-func init() {
-	if !gulu.File.IsExist(ConfDir) {
-		if err := os.Mkdir(ConfDir, 0755); nil != err && !os.IsExist(err) {
-			Logger.Fatalf("create conf folder [%s] failed: %s", ConfDir, err)
-		}
-	}
-
-	if gulu.File.IsExist(LogPath) {
-		if size := gulu.File.GetFileSize(LogPath); 1024*1024*2 <= size {
-			// 日志文件大于 2M 的话删了重建
-			if err := os.Remove(LogPath); nil != err {
-				fmt.Errorf("remove log file [%s] failed: %s", LogPath, err)
-				os.Exit(-2)
-			}
-		}
-	}
-
-	var err error
-	logFile, err = os.OpenFile(LogPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
-	if nil != err {
-		fmt.Errorf("create log file [%s] failed: %s", LogPath, err)
-		os.Exit(-2)
-	}
-
-	gulu.Log.SetLevel("trace")
-	Logger = gulu.Log.NewLogger(io.MultiWriter(logFile, os.Stdout))
-}
-
 func main() {
 	defer logFile.Close()
 
-	wd := flag.String("wd", WorkingDir, "working directory")
+	confPath := flag.String("conf", "", "dir path of conf dir (.siyuan/), default to ~/siyuan/")
+	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
+	packPath := flag.String("pack", UpdateZipPath, "update package path, default to $temp/siyuan/update.zip")
 	flag.Parse()
 
-	WorkingDir = *wd
+	if "" != *confPath {
+		ConfDir = *confPath
+	}
+	if "" != *wdPath {
+		WorkingDir = *wdPath
+	}
+	if "" != *packPath {
+		UpdateZipPath = *packPath
+	}
 
-	syTempFolder := filepath.Join(os.TempDir(), "siyuan")
-	updateZipPath := filepath.Join(syTempFolder, "update.zip")
-	if !gulu.File.IsExist(updateZipPath) {
+	initConfLog()
+
+	if !gulu.File.IsExist(UpdateZipPath) {
 		return
 	}
 
@@ -119,8 +103,8 @@ func main() {
 		break
 	}
 
-	Logger.Infof("unzipping update pack [from=%s, to=%s]", updateZipPath, WorkingDir)
-	if err := gulu.Zip.Unzip(updateZipPath, WorkingDir); nil != err {
+	Logger.Infof("unzipping update pack [from=%s, to=%s]", UpdateZipPath, WorkingDir)
+	if err := gulu.Zip.Unzip(UpdateZipPath, WorkingDir); nil != err {
 		Logger.Errorf("unzip update pack failed: %s", err)
 		return
 	}
@@ -134,8 +118,35 @@ func main() {
 	} else {
 		exec.Command("chmod", "+x", kernel).CombinedOutput()
 	}
-	if err := os.RemoveAll(updateZipPath); nil != err {
-		Logger.Errorf("remove update pack [%s] failed: %s", updateZipPath, err)
+	if err := os.RemoveAll(UpdateZipPath); nil != err {
+		Logger.Errorf("remove update pack [%s] failed: %s", UpdateZipPath, err)
 		return
 	}
+}
+
+func initConfLog() {
+	if !gulu.File.IsExist(ConfDir) {
+		if err := os.Mkdir(ConfDir, 0755); nil != err && !os.IsExist(err) {
+			Logger.Fatalf("create conf folder [%s] failed: %s", ConfDir, err)
+		}
+	}
+
+	if gulu.File.IsExist(LogPath) {
+		if size := gulu.File.GetFileSize(LogPath); 1024*1024*1 <= size {
+			if err := os.Remove(LogPath); nil != err {
+				fmt.Errorf("remove log file [%s] failed: %s", LogPath, err)
+				os.Exit(-2)
+			}
+		}
+	}
+
+	var err error
+	logFile, err = os.OpenFile(LogPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
+	if nil != err {
+		fmt.Errorf("create log file [%s] failed: %s", LogPath, err)
+		os.Exit(-2)
+	}
+
+	gulu.Log.SetLevel("trace")
+	Logger = gulu.Log.NewLogger(io.MultiWriter(logFile, os.Stdout))
 }
