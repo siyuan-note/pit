@@ -1,8 +1,12 @@
-// SiYuan - 源于思考，饮水思源
+// Pit - 思源笔记更新程序
 // Copyright (c) 2020-present, ld246.com
 //
-// 本文件属于思源笔记源码的一部分，云南链滴科技有限公司版权所有。
-//
+// Lute is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+//         http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
 
 package main
 
@@ -56,7 +60,7 @@ func main() {
 		return
 	}
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond) // 稍微等待一下思源内核进程退出
 	kernel := filepath.Join(WorkingDir, "kernel")
 	if gulu.OS.IsWindows() {
 		kernel += ".exe"
@@ -72,29 +76,31 @@ func main() {
 	guide := filepath.Join(WorkingDir, "guide")
 	asar := filepath.Join(WorkingDir, "app.asar")
 
-	for cnt := 0; cnt < 7; cnt++ {
-		if err := os.RemoveAll(kernel); nil != err {
+	// TODO: 考虑回滚机制（比如先整体移动到临时目录，后续解压等操作如果失败再移动回来）
+
+	for cnt := 0; cnt < 7; cnt++ { // 重试执行
+		if err := os.RemoveAll(kernel); nil != err { // 删除内核程序
 			Logger.Errorf("remove [kernel] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
 		}
-		if err := os.RemoveAll(asar); nil != err {
+		if err := os.RemoveAll(asar); nil != err { // 删除 app.asar
 			Logger.Errorf("remove [app.asar] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
 		}
 
-		if err := os.RemoveAll(appearance); nil != err {
+		if err := os.RemoveAll(appearance); nil != err { // 删除 appearance 文件夹
 			Logger.Errorf("remove [appearance] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
 		}
-		if err := os.RemoveAll(stage); nil != err {
+		if err := os.RemoveAll(stage); nil != err { // 删除 stage 文件夹
 			Logger.Errorf("remove [stage] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
 		}
-		if err := os.RemoveAll(guide); nil != err {
+		if err := os.RemoveAll(guide); nil != err { // 删除 guide 文件夹
 			Logger.Errorf("remove [guide] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
