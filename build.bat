@@ -1,4 +1,4 @@
-echo 'Building Kernel'
+echo 'Building'
 
 go version
 set GO111MODULE=on
@@ -6,12 +6,12 @@ set GOPROXY=https://goproxy.io
 
 set GOOS=windows
 set GOARCH=amd64
-go build -v -o "updater-win.exe" -ldflags "-s -w -H=windowsgui"
+go build -v -o "pit-win.exe" -ldflags "-s -w -H=windowsgui"
 
 set GOOS=darwin
 set GOARCH=amd64
-go build -v -o "updater-darwin" -ldflags "-s -w"
+go build -v -o "pit-darwin" -ldflags "-s -w"
 
 set GOOS=linux
 set GOARCH=amd64
-go build -v -o "updater-linux" -ldflags "-s -w"
+go build -v -o "pit-linux" -ldflags "-s -w"

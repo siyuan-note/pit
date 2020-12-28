@@ -1,3 +1,3 @@
-# siyuan-updater
+# pit
 
 思源笔记更新器。

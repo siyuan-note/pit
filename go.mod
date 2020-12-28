@@ -1,4 +1,4 @@
-module github.com/siyuan-note/siyuan-updater
+module github.com/siyuan-note/pit
 
 go 1.15
 
