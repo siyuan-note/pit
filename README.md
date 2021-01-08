@@ -17,7 +17,5 @@
    * stage 文件夹
    * guide 文件夹
 2. 解压更新包到工作目录
-   * Windows 下需要将解压出来的 kernel-win.exe 重命名为 kernel.exe
-   * Linux、macOS 解压后重名会覆盖，使用 `chmod +x` 赋予执行权限
+   * Linux、macOS 使用 `chmod +x` 赋予执行权限
 3. 删除更新包
-

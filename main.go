@@ -14,9 +14,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -61,16 +63,23 @@ func main() {
 	}
 
 	time.Sleep(500 * time.Millisecond) // 稍微等待一下思源内核进程退出
-	kernel := filepath.Join(WorkingDir, "kernel")
-	if gulu.OS.IsWindows() {
-		kernel += ".exe"
-	} else {
-		if gulu.OS.IsLinux() {
-			kernel += "-linux"
-		} else if gulu.OS.IsDarwin() {
-			kernel += "-darwin"
+
+	fis, err := ioutil.ReadDir(WorkingDir)
+	if nil != err {
+		Logger.Fatalf("read working dir [%s] failed: %s", WorkingDir, err)
+	}
+	// 删除内核程序
+	for _, fi := range fis {
+		if strings.HasPrefix(fi.Name(), "kernel") {
+			kernel := filepath.Join(WorkingDir, fi.Name())
+			if err = os.RemoveAll(kernel); nil != err {
+				Logger.Errorf("remove kernel [%s] failed: %s", kernel, err)
+			} else {
+				Logger.Infof("removed old kernel [%s]", kernel)
+			}
 		}
 	}
+
 	appearance := filepath.Join(WorkingDir, "appearance")
 	stage := filepath.Join(WorkingDir, "stage")
 	guide := filepath.Join(WorkingDir, "guide")
@@ -79,52 +88,59 @@ func main() {
 	// TODO: 考虑回滚机制（比如先整体移动到临时目录，后续解压等操作如果失败再移动回来）
 
 	for cnt := 0; cnt < 7; cnt++ { // 重试执行
-		if err := os.RemoveAll(kernel); nil != err { // 删除内核程序
-			Logger.Errorf("remove [kernel] failed: %s", err)
-			time.Sleep(50 * time.Millisecond)
-			continue
-		}
-		if err := os.RemoveAll(asar); nil != err { // 删除 app.asar
+		if err = os.RemoveAll(asar); nil != err { // 删除 app.asar
 			Logger.Errorf("remove [app.asar] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
+		} else {
+			Logger.Infof("removed [app.asar]", asar)
 		}
 
-		if err := os.RemoveAll(appearance); nil != err { // 删除 appearance 文件夹
+		if err = os.RemoveAll(appearance); nil != err { // 删除 appearance 文件夹
 			Logger.Errorf("remove [appearance] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
+		} else {
+			Logger.Infof("removed [appearance]")
 		}
-		if err := os.RemoveAll(stage); nil != err { // 删除 stage 文件夹
+		if err = os.RemoveAll(stage); nil != err { // 删除 stage 文件夹
 			Logger.Errorf("remove [stage] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
+		} else {
+			Logger.Infof("removed [stage]")
 		}
-		if err := os.RemoveAll(guide); nil != err { // 删除 guide 文件夹
+		if err = os.RemoveAll(guide); nil != err { // 删除 guide 文件夹
 			Logger.Errorf("remove [guide] failed: %s", err)
 			time.Sleep(50 * time.Millisecond)
 			continue
+		} else {
+			Logger.Infof("removed [guide]")
 		}
 
 		break
 	}
 
 	Logger.Infof("unzipping update pack [from=%s, to=%s]", UpdateZipPath, WorkingDir)
-	if err := gulu.Zip.Unzip(UpdateZipPath, WorkingDir); nil != err {
+	if err = gulu.Zip.Unzip(UpdateZipPath, WorkingDir); nil != err {
 		Logger.Errorf("unzip update pack failed: %s", err)
 		return
 	}
 	Logger.Infof("unzipped update pack")
-	if gulu.OS.IsWindows() {
-		unzippedKernel := filepath.Join(WorkingDir, "kernel-win.exe")
-		if err := os.Rename(unzippedKernel, kernel); nil != err {
-			Logger.Errorf("rename kernel [from=%s, to=%s] failed: %s", unzippedKernel, kernel, err)
-			return
+
+	if !gulu.OS.IsWindows() {
+		// 赋予执行权限
+
+		fis, _ = ioutil.ReadDir(WorkingDir)
+		for _, fi := range fis {
+			if strings.HasPrefix(fi.Name(), "kernel") {
+				kernel := filepath.Join(WorkingDir, fi.Name())
+				exec.Command("chmod", "+x", kernel).CombinedOutput()
+				Logger.Infof("chmod +x " + kernel)
+			}
 		}
-	} else {
-		exec.Command("chmod", "+x", kernel).CombinedOutput()
 	}
-	if err := os.RemoveAll(UpdateZipPath); nil != err {
+	if err = os.RemoveAll(UpdateZipPath); nil != err {
 		Logger.Errorf("remove update pack [%s] failed: %s", UpdateZipPath, err)
 		return
 	}
