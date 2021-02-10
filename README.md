@@ -2,8 +2,6 @@
 
 思源笔记更新程序，Pit 取自 F1 方程式赛车维修区英文名。
 
-## 工作流程
-
 1. 带上 `.old` 后缀重命名工作目录下的文件
    * kernel.exe / kernel-linux / kernel-darwin
    * app.asar
