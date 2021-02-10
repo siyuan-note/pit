@@ -68,57 +68,36 @@ func main() {
 	if nil != err {
 		Logger.Fatalf("read working dir [%s] failed: %s", WorkingDir, err)
 	}
-	// 删除内核程序
+
+	// 重命名为 .old 后缀
+
 	for _, fi := range fis {
 		if strings.HasPrefix(fi.Name(), "kernel") {
 			kernel := filepath.Join(WorkingDir, fi.Name())
-			if err = os.RemoveAll(kernel); nil != err {
-				Logger.Errorf("remove kernel [%s] failed: %s", kernel, err)
-			} else {
-				Logger.Infof("removed old kernel [%s]", kernel)
+			if err = os.Rename(kernel, kernel+".old"); nil != err {
+				Logger.Errorf("rename kernel [%s] failed: %s", kernel, err)
 			}
 		}
 	}
 
-	appearance := filepath.Join(WorkingDir, "appearance")
-	stage := filepath.Join(WorkingDir, "stage")
-	guide := filepath.Join(WorkingDir, "guide")
 	asar := filepath.Join(WorkingDir, "app.asar")
+	if err = os.Rename(asar, asar+".old"); nil != err {
+		Logger.Errorf("rename [app.asar] failed: %s", err)
+	}
 
-	// TODO: 考虑回滚机制（比如先整体移动到临时目录，后续解压等操作如果失败再移动回来）
+	appearance := filepath.Join(WorkingDir, "appearance")
+	if err = os.Rename(appearance, appearance+".old"); nil != err {
+		Logger.Errorf("rename [appearance] failed: %s", err)
+	}
 
-	for cnt := 0; cnt < 7; cnt++ { // 重试执行
-		if err = os.RemoveAll(asar); nil != err { // 删除 app.asar
-			Logger.Errorf("remove [app.asar] failed: %s", err)
-			time.Sleep(50 * time.Millisecond)
-			continue
-		} else {
-			Logger.Infof("removed [app.asar]", asar)
-		}
+	stage := filepath.Join(WorkingDir, "stage")
+	if err = os.Rename(stage, stage+".old"); nil != err {
+		Logger.Errorf("rename [stage] failed: %s", err)
+	}
 
-		if err = os.RemoveAll(appearance); nil != err { // 删除 appearance 文件夹
-			Logger.Errorf("remove [appearance] failed: %s", err)
-			time.Sleep(50 * time.Millisecond)
-			continue
-		} else {
-			Logger.Infof("removed [appearance]")
-		}
-		if err = os.RemoveAll(stage); nil != err { // 删除 stage 文件夹
-			Logger.Errorf("remove [stage] failed: %s", err)
-			time.Sleep(50 * time.Millisecond)
-			continue
-		} else {
-			Logger.Infof("removed [stage]")
-		}
-		if err = os.RemoveAll(guide); nil != err { // 删除 guide 文件夹
-			Logger.Errorf("remove [guide] failed: %s", err)
-			time.Sleep(50 * time.Millisecond)
-			continue
-		} else {
-			Logger.Infof("removed [guide]")
-		}
-
-		break
+	guide := filepath.Join(WorkingDir, "guide")
+	if err = os.Rename(guide, guide+".old"); nil != err {
+		Logger.Errorf("rename [guide] failed: %s", err)
 	}
 
 	Logger.Infof("unzipping update pack [from=%s, to=%s]", UpdateZipPath, WorkingDir)
@@ -129,8 +108,6 @@ func main() {
 	Logger.Infof("unzipped update pack")
 
 	if !gulu.OS.IsWindows() {
-		// 赋予执行权限
-
 		fis, _ = ioutil.ReadDir(WorkingDir)
 		for _, fi := range fis {
 			if strings.HasPrefix(fi.Name(), "kernel") {
@@ -140,6 +117,7 @@ func main() {
 			}
 		}
 	}
+
 	if err = os.RemoveAll(UpdateZipPath); nil != err {
 		Logger.Errorf("remove update pack [%s] failed: %s", UpdateZipPath, err)
 		return
