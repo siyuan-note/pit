@@ -4,9 +4,6 @@
 *.dll
 *.so
 *.dylib
-pit.exe
-pit-linux
-pit-darwin
 
 # Test binary, built with `go test -c`
 *.test
