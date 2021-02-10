@@ -11,6 +11,8 @@
 package pit
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -20,53 +22,48 @@ import (
 	"github.com/88250/gulu"
 )
 
-func ApplyUpdate(logger *gulu.Logger, updateZipPath, workingDir string) {
+func ApplyUpdate(updateZipPath, workingDir string) error {
 	if !gulu.File.IsExist(updateZipPath) {
-		return
+		return nil
 	}
 
 	fis, err := ioutil.ReadDir(workingDir)
 	if nil != err {
-		logger.Fatalf("read working dir [%s] failed: %s", workingDir, err)
+		return errors.New(fmt.Sprintf("read working dir [%s] failed: %s", workingDir, err))
 	}
-
-	// 重命名为 .old 后缀
 
 	for _, fi := range fis {
 		if strings.HasPrefix(fi.Name(), "kernel") {
 			kernel := filepath.Join(workingDir, fi.Name())
 			if err = os.Rename(kernel, kernel+".old"); nil != err {
-				logger.Errorf("rename kernel [%s] failed: %s", kernel, err)
+				return errors.New(fmt.Sprintf("rename kernel [%s] failed: %s", kernel, err))
 			}
 		}
 	}
 
 	asar := filepath.Join(workingDir, "app.asar")
 	if err = os.Rename(asar, asar+".old"); nil != err {
-		logger.Errorf("rename [app.asar] failed: %s", err)
+		return errors.New(fmt.Sprintf("rename [app.asar] failed: %s", err))
 	}
 
 	appearance := filepath.Join(workingDir, "appearance")
 	if err = os.Rename(appearance, appearance+".old"); nil != err {
-		logger.Errorf("rename [appearance] failed: %s", err)
+		return errors.New(fmt.Sprintf("rename [appearance] failed: %s", err))
 	}
 
 	stage := filepath.Join(workingDir, "stage")
 	if err = os.Rename(stage, stage+".old"); nil != err {
-		logger.Errorf("rename [stage] failed: %s", err)
+		return errors.New(fmt.Sprintf("rename [stage] failed: %s", err))
 	}
 
 	guide := filepath.Join(workingDir, "guide")
 	if err = os.Rename(guide, guide+".old"); nil != err {
-		logger.Errorf("rename [guide] failed: %s", err)
+		return errors.New(fmt.Sprintf("rename [guide] failed: %s", err))
 	}
 
-	logger.Infof("unzipping update pack [from=%s, to=%s]", updateZipPath, workingDir)
 	if err = gulu.Zip.Unzip(updateZipPath, workingDir); nil != err {
-		logger.Errorf("unzip update pack failed: %s", err)
-		return
+		return errors.New(fmt.Sprintf("unzip update pack failed: %s", err))
 	}
-	logger.Infof("unzipped update pack")
 
 	if !gulu.OS.IsWindows() {
 		fis, _ = ioutil.ReadDir(workingDir)
@@ -74,13 +71,12 @@ func ApplyUpdate(logger *gulu.Logger, updateZipPath, workingDir string) {
 			if strings.HasPrefix(fi.Name(), "kernel") {
 				kernel := filepath.Join(workingDir, fi.Name())
 				exec.Command("chmod", "+x", kernel).CombinedOutput()
-				logger.Infof("chmod +x " + kernel)
 			}
 		}
 	}
 
 	if err = os.RemoveAll(updateZipPath); nil != err {
-		logger.Errorf("remove update pack [%s] failed: %s", updateZipPath, err)
-		return
+		return errors.New(fmt.Sprintf("remove update pack [%s] failed: %s", updateZipPath, err))
 	}
+	return nil
 }
