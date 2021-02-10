@@ -1,4 +1,4 @@
-// Pit - 思源笔记更新函数
+// Pit - 思源笔记更新程序
 // Copyright (c) 2020-present, ld246.com
 //
 // Lute is licensed under Mulan PSL v2.
