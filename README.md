@@ -4,7 +4,6 @@
 
 1. 带上 `.old` 后缀重命名工作目录下的文件
    * kernel.exe / kernel-linux / kernel-darwin
-   * app.asar
    * appearance 文件夹
    * stage 文件夹
    * guide 文件夹

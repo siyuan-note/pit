@@ -41,11 +41,6 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 		}
 	}
 
-	asar := filepath.Join(workingDir, "app.asar")
-	if err = os.Rename(asar, asar+".old"); nil != err {
-		return errors.New(fmt.Sprintf("rename [app.asar] failed: %s", err))
-	}
-
 	appearance := filepath.Join(workingDir, "appearance")
 	if err = os.Rename(appearance, appearance+".old"); nil != err {
 		return errors.New(fmt.Sprintf("rename [appearance] failed: %s", err))
