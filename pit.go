@@ -33,28 +33,20 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 	}
 
 	for _, fi := range fis {
-		if strings.HasPrefix(fi.Name(), "kernel") {
+		if strings.HasPrefix(fi.Name(), "kernel") && !strings.HasSuffix(fi.Name(), ".old") {
 			kernel := filepath.Join(workingDir, fi.Name())
-			if err = os.Rename(kernel, kernel+".old"); nil != err {
-				return errors.New(fmt.Sprintf("rename kernel [%s] failed: %s", kernel, err))
-			}
+			os.Rename(kernel, kernel+".old")
 		}
 	}
 
 	appearance := filepath.Join(workingDir, "appearance")
-	if err = os.Rename(appearance, appearance+".old"); nil != err {
-		return errors.New(fmt.Sprintf("rename [appearance] failed: %s", err))
-	}
+	os.Rename(appearance, appearance+".old")
 
 	stage := filepath.Join(workingDir, "stage")
-	if err = os.Rename(stage, stage+".old"); nil != err {
-		return errors.New(fmt.Sprintf("rename [stage] failed: %s", err))
-	}
+	os.Rename(stage, stage+".old")
 
 	guide := filepath.Join(workingDir, "guide")
-	if err = os.Rename(guide, guide+".old"); nil != err {
-		return errors.New(fmt.Sprintf("rename [guide] failed: %s", err))
-	}
+	os.Rename(guide, guide+".old")
 
 	if err = gulu.Zip.Unzip(updateZipPath, workingDir); nil != err {
 		return errors.New(fmt.Sprintf("unzip update pack failed: %s", err))
