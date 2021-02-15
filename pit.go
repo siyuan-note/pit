@@ -18,11 +18,17 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/88250/gulu"
 )
 
+var applyUpdateLock = sync.Mutex{}
+
 func ApplyUpdate(updateZipPath, workingDir string) error {
+	applyUpdateLock.Lock()
+	defer applyUpdateLock.Unlock()
+
 	if !gulu.File.IsExist(updateZipPath) {
 		return nil
 	}
