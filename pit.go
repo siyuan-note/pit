@@ -24,12 +24,13 @@ import (
 )
 
 var applyUpdateLock = sync.Mutex{}
+var applied bool
 
 func ApplyUpdate(updateZipPath, workingDir string) error {
 	applyUpdateLock.Lock()
 	defer applyUpdateLock.Unlock()
 
-	if !gulu.File.IsExist(updateZipPath) {
+	if applied || !gulu.File.IsExist(updateZipPath) {
 		return nil
 	}
 
@@ -45,12 +46,12 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 		}
 	}
 
+	applied = true
+
 	appearance := filepath.Join(workingDir, "appearance")
 	os.Rename(appearance, appearance+".old")
-
 	stage := filepath.Join(workingDir, "stage")
 	os.Rename(stage, stage+".old")
-
 	guide := filepath.Join(workingDir, "guide")
 	os.Rename(guide, guide+".old")
 
