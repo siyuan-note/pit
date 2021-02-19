@@ -34,6 +34,8 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 		return nil
 	}
 
+	applied = true
+
 	fis, err := ioutil.ReadDir(workingDir)
 	if nil != err {
 		return errors.New(fmt.Sprintf("read working dir [%s] failed: %s", workingDir, err))
@@ -46,14 +48,18 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 		}
 	}
 
-	applied = true
-
 	appearance := filepath.Join(workingDir, "appearance")
-	os.Rename(appearance, appearance+".old")
+	if err = os.Rename(appearance, appearance+".old"); nil != err {
+		return err
+	}
 	stage := filepath.Join(workingDir, "stage")
-	os.Rename(stage, stage+".old")
+	if err = os.Rename(stage, stage+".old"); nil != err {
+		return err
+	}
 	guide := filepath.Join(workingDir, "guide")
-	os.Rename(guide, guide+".old")
+	if err = os.Rename(guide, guide+".old"); nil != err {
+		return err
+	}
 
 	if err = gulu.Zip.Unzip(updateZipPath, workingDir); nil != err {
 		return errors.New(fmt.Sprintf("unzip update pack failed: %s", err))
