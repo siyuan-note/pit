@@ -15,7 +15,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -33,7 +32,6 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 	if applied || !gulu.File.IsExist(updateZipPath) {
 		return nil
 	}
-
 	applied = true
 
 	fis, err := ioutil.ReadDir(workingDir)
@@ -64,19 +62,26 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 	if err = gulu.Zip.Unzip(updateZipPath, workingDir); nil != err {
 		return errors.New(fmt.Sprintf("unzip update pack failed: %s", err))
 	}
+	return nil
+}
 
-	if !gulu.OS.IsWindows() {
-		fis, _ = ioutil.ReadDir(workingDir)
-		for _, fi := range fis {
-			if strings.HasPrefix(fi.Name(), "kernel") {
-				kernel := filepath.Join(workingDir, fi.Name())
-				exec.Command("chmod", "+x", kernel).CombinedOutput()
-			}
-		}
+func Rollback(workingDir string) error {
+	fis, err := ioutil.ReadDir(workingDir)
+	if nil != err {
+		return errors.New(fmt.Sprintf("read working dir [%s] failed: %s", workingDir, err))
 	}
 
-	if err = os.RemoveAll(updateZipPath); nil != err {
-		return errors.New(fmt.Sprintf("remove update pack [%s] failed: %s", updateZipPath, err))
+	for _, fi := range fis {
+		if strings.HasSuffix(fi.Name(), ".old") {
+			file := filepath.Join(workingDir, fi.Name())
+			newFile := strings.TrimSuffix(file, ".old")
+			if err = os.RemoveAll(newFile); nil != err {
+				return errors.New(fmt.Sprintf("remove [%s] failed: %s", newFile, err))
+			}
+			if err = os.Rename(file, newFile); nil != err {
+				return errors.New(fmt.Sprintf("rename [%s] to [%s] failed: %s", file, newFile, err))
+			}
+		}
 	}
 	return nil
 }
