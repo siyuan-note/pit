@@ -83,5 +83,7 @@ func Rollback(workingDir string) error {
 			}
 		}
 	}
+
+	os.RemoveAll(filepath.Join(workingDir, "update.asar"))
 	return nil
 }
