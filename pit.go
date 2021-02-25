@@ -58,6 +58,10 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 	if err = os.Rename(guide, guide+".old"); nil != err {
 		return err
 	}
+	app := filepath.Join(workingDir, "app")
+	if err = os.Rename(app, app+".old"); nil != err {
+		return err
+	}
 
 	if err = gulu.Zip.Unzip(updateZipPath, workingDir); nil != err {
 		return errors.New(fmt.Sprintf("unzip update pack failed: %s", err))
