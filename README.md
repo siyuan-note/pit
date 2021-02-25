@@ -7,6 +7,7 @@
    * appearance 文件夹
    * stage 文件夹
    * guide 文件夹
+   * app 文件夹
 2. 解压更新包到工作目录
    * Linux、macOS 使用 `chmod +x` 赋予执行权限
 3. 删除更新包
