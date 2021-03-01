@@ -13,11 +13,8 @@ package pit
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/88250/gulu"
@@ -35,47 +32,29 @@ func ApplyUpdate(updateZipPath, workingDir string) error {
 	}
 	applied = true
 
-	fis, err := ioutil.ReadDir(workingDir)
-	if nil != err {
-		return errors.New(fmt.Sprintf("read working dir [%s] failed: %s", workingDir, err))
+	kernel := filepath.Join(workingDir, "kernel")
+	if err := os.Rename(kernel, kernel+".old"); nil != err {
+		return err
 	}
-
-	for _, fi := range fis {
-		if strings.HasPrefix(fi.Name(), "kernel") && !strings.HasSuffix(fi.Name(), ".old") {
-			kernel := filepath.Join(workingDir, fi.Name())
-			os.Rename(kernel, kernel+".old")
-		}
-	}
-
 	appearance := filepath.Join(workingDir, "appearance")
-	if err = os.Rename(appearance, appearance+".old"); nil != err {
+	if err := os.Rename(appearance, appearance+".old"); nil != err {
 		return err
 	}
 	stage := filepath.Join(workingDir, "stage")
-	if err = os.Rename(stage, stage+".old"); nil != err {
+	if err := os.Rename(stage, stage+".old"); nil != err {
 		return err
 	}
 	guide := filepath.Join(workingDir, "guide")
-	if err = os.Rename(guide, guide+".old"); nil != err {
+	if err := os.Rename(guide, guide+".old"); nil != err {
 		return err
 	}
 	app := filepath.Join(workingDir, "app")
-	if err = os.Rename(app, app+".old"); nil != err {
+	if err := os.Rename(app, app+".old"); nil != err {
 		return err
 	}
 
-	if err = gulu.Zip.Unzip(updateZipPath, workingDir); nil != err {
+	if err := gulu.Zip.Unzip(updateZipPath, workingDir); nil != err {
 		return errors.New(fmt.Sprintf("unzip update pack failed: %s", err))
-	}
-
-	if !gulu.OS.IsWindows() {
-		fis, _ = ioutil.ReadDir(workingDir)
-		for _, fi := range fis {
-			if strings.HasPrefix(fi.Name(), "kernel") {
-				kernel := filepath.Join(workingDir, fi.Name())
-				exec.Command("chmod", "+x", kernel).CombinedOutput()
-			}
-		}
 	}
 
 	os.RemoveAll(updateZipPath)
